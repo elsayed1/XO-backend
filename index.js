@@ -2,10 +2,10 @@ const express = require("express");
 const app = express();
 const server = require("http").Server(app);
 
-const io = require("socket.io").listen(server);
+const io = require("socket.io")(server);
 
 app.get("/", (req, res) => {
-  res.end("hellooo");
+  res.end("Hello");
 });
 let rooms = 0;
 
