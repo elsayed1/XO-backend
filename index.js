@@ -53,6 +53,7 @@ const checkWinner = (board) => {
 };
 
 io.on("connection", (socket) => {
+  console.log(io.sockets.sockets.size);
   // Create a new game room and notify the creator of game.
   socket.on("create room", (player1) => {
     const roomName = `room${++rooms.size}`;
@@ -96,8 +97,10 @@ io.on("connection", (socket) => {
     io.to(roomName).emit("newGameStarted", game);
   });
 
+  
   // Handle the turn played by either player and notify the other.
   socket.on("playTurn", ({ roomName, tile }) => {
+    console.log(tile);
     const { board, playerTurn, player1, player2 } = rooms.get(roomName) || {};
     board[tile.r][tile.c] = playerTurn === player1 ? "X" : "O";
     rooms.set(roomName, {
@@ -107,12 +110,16 @@ io.on("connection", (socket) => {
       player2,
     });
     io.to(roomName).emit("turnPlayed", rooms.get(roomName));
-
+    const getWinnerPlayer= (winner)=>{
+      if(!winner)
+      return null;
+      return winner === 'X' ?player1:player2
+    }
     const winner = checkWinner(board);
-    if (winner) return io.to(roomName).emit("gameOver", {winner});
+    if (winner) return io.to(roomName).emit("gameOver", {winner:getWinnerPlayer(winner)});
 
     if(board.flat().filter(Boolean).length === boardInitial.flat().length)
-    return io.to(roomName).emit("gameOver", {winner});
+    return io.to(roomName).emit("gameOver", {winner :winner});
   });
 
   /**
